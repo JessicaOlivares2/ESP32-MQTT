@@ -1,0 +1,19 @@
+/*
+ * Archivo style.css
+ * Este archivo es opcional y puede ser utilizado para agregar estilos CSS adicionales
+ * a la interfaz web (web_interface/index.html) si se desea separar el CSS del HTML.
+ *
+ * Actualmente, los estilos básicos están incluidos directamente en index.html.
+ * Puedes mover esos estilos aquí y añadir más para personalizar el diseño.
+ */
+
+/* Ejemplo:
+body {
+    background-color: #e0f2f7;
+}
+
+.container {
+    border: 2px solid #007bff;
+    padding: 40px;
+}
+*/
