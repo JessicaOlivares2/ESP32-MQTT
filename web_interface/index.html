@@ -3,68 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Luz de Lámpara</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: #f0f0f0;
-            margin: 0;
-        }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1.2em;
-            cursor: pointer;
-            margin: 10px;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button.off {
-            background-color: #f44336;
-        }
-        button.off:hover {
-            background-color: #da190b;
-        }
-        #status {
-            margin-top: 20px;
-            font-size: 1.1em;
-            color: #555;
-            font-weight: bold;
-        }
-    </style>
-</head>
+    <title>Control de Luz Remota Sencillo</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
+    
+    </head>
 <body>
-    <div class="container">
-        <h1>Control de Luz de la Lámpara</h1>
-        <button id="turnOnButton">Encender Luz</button>
-        <button id="turnOffButton" class="off">Apagar Luz</button>
-        <div id="status">Estado: Conectando al MQTT...</div>
+
+    <div class="light-control-panel">
+        <h2>Control de Luz de la Puerta</h2>
+        <div class="light-switch">
+            <div class="switch-base">
+                <div class="switch-handle" id="switchHandle"></div>
+            </div>
+        </div>
+        <div class="light-status">
+            <span id="statusIndicator" class="off"></span>
+            <span id="statusText">Desconocido</span>
+        </div>
+        <div class="control-buttons">
+            <button id="turnOnButton">Encender</button>
+            <button id="turnOffButton">Apagar</button>
+        </div>
+        <div id="status" class="connection-status">Estado: Inicializando...</div>
     </div>
 
-    <!-- Incluir la librería Paho MQTT desde un CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
-    <!-- Incluir nuestro script JavaScript -->
-    <script src="script.js"></script>
+    <script src="script.js"></script> 
+
 </body>
 </html>
