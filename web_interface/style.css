@@ -1,146 +1,194 @@
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', Arial, sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background-color: #e9eff5;
+    background-color: #f0f0f0;
     margin: 0;
-    color: #333;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .light-control-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
+    background-color: #ffffff;
     padding: 30px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     text-align: center;
-    width: 90%;
-    max-width: 400px; /* Ajustado para un panel más compacto */
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 30px;
+    border: 1px solid #e0e0e0;
 }
 
 .light-control-panel h2 {
-    color: #2c3e50;
-    margin-bottom: 15px;
+    color: #333;
+    margin-bottom: 25px;
     font-size: 1.8em;
+    font-weight: 700;
 }
 
+/* Estilos del interruptor visual */
 .light-switch {
-    background-color: #e0e0e0;
-    border-radius: 5px;
-    padding: 10px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 25px;
 }
 
 .switch-base {
-    width: 80px;
+    width: 100px;
     height: 40px;
-    background-color: #fff;
+    background-color: #e0e0e0;
     border-radius: 20px;
     position: relative;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    overflow: hidden; /* Asegura que el handle no se salga */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .switch-handle {
     width: 36px;
     height: 36px;
-    background-color: #ccc;
+    background-color: #fff;
     border-radius: 50%;
     position: absolute;
     top: 2px;
     left: 2px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.switch-handle.on {
-    transform: translateX(40px); /* Mueve a la derecha */
-    background-color: #5cb85c; /* Verde para encendido */
+/* Estado ON del interruptor visual */
+.light-switch.on .switch-base {
+    background-color: #4CAF50; /* Verde cuando está encendido */
 }
 
-.switch-handle.off {
-    background-color: #d9534f; /* Rojo para apagado */
+.light-switch.on .switch-handle {
+    left: calc(100% - 38px); /* Mueve el handle a la derecha */
 }
 
+/* Estilos del indicador de estado de la luz */
 .light-status {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 1.2em;
+    justify-content: center;
+    margin-bottom: 25px;
+    font-size: 1.1em;
     color: #555;
-    margin-top: 10px;
+    font-weight: bold;
 }
 
 #statusIndicator {
-    display: inline-block;
-    width: 15px;
-    height: 15px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    background-color: #ccc; /* Gris por defecto */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    background-color: #ccc; /* Color por defecto */
+    margin-right: 10px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 #statusIndicator.on {
-    background-color: #5cb85c; /* Verde */
+    background-color: #4CAF50; /* Verde cuando está encendido */
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.6); /* Resplandor */
 }
 
 #statusIndicator.off {
-    background-color: #d9534f; /* Rojo */
+    background-color: #f44336; /* Rojo cuando está apagado */
+    box-shadow: 0 0 8px rgba(244, 67, 54, 0.6); /* Resplandor */
 }
 
+/* Estilos de los botones de control */
 .control-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .control-buttons button {
+    background-color: #007bff;
+    color: white;
     padding: 12px 25px;
-    font-size: 1em;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-size: 1.1em;
     cursor: pointer;
-    transition: background-color 0.3s ease, opacity 0.3s ease;
-    flex-grow: 1; /* Para que los botones se expandan */
+    margin: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.control-buttons button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.control-buttons button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
 }
 
-.control-buttons button#turnOnButton {
-    background-color: #5cb85c;
-    color: white;
+.control-buttons button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.control-buttons button#turnOnButton:hover:not(:disabled) {
-    background-color: #4cae4c;
-}
-
-.control-buttons button#turnOffButton {
-    background-color: #f0ad4e; /* Naranja para apagado inicial */
-    color: white;
-}
-
-.control-buttons button#turnOffButton:hover:not(:disabled) {
-    background-color: #ec971f;
-}
-
-/* Estilo para el div de estado general de la conexión */
+/* Estilo para el estado de conexión general */
 .connection-status {
     margin-top: 20px;
     font-size: 0.9em;
     color: #777;
-    padding: 8px 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #fff;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* --- Estilos para la sección del código Arduino --- */
+.arduino-code-section {
+    background-color: #282c34;
+    color: #abb2bf;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 800px;
+    overflow-x: auto;
+    margin-top: 30px;
+    text-align: left;
+    border: 1px solid #3a3f4b;
+}
+
+.arduino-code-section h2 {
+    color: #61afef;
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.6em;
+    font-weight: 600;
+}
+
+.arduino-code-section pre {
+    margin: 0;
+    padding: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.6;
+}
+
+.arduino-code-section code {
+    display: block;
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', 'Lucida Console', monospace;
+    font-size: 0.9em;
+    background-color: #21252b;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* Estilos de la barra de desplazamiento para navegadores Webkit */
+.arduino-code-section::-webkit-scrollbar {
+    height: 8px;
+    background-color: #3a3f4b;
+    border-radius: 4px;
+}
+
+.arduino-code-section::-webkit-scrollbar-thumb {
+    background-color: #61afef;
+    border-radius: 4px;
+}
+
+.arduino-code-section::-webkit-scrollbar-thumb:hover {
+    background-color: #529fde;
 }

@@ -9,29 +9,21 @@ const publishTopic = "casa/puerta/luz/control";  // Donde la interfaz publica co
 
 let client; // Variable global para el cliente MQTT
 
-// Referencias a los elementos del DOM (ya existentes en tu código)
-const statusDiv = document.getElementById('status');
-const turnOnButton = document.getElementById('turnOnButton');
-const turnOffButton = document.getElementById('turnOffButton');
-
-// **NUEVAS** referencias a los elementos del DOM para el diseño del interruptor
-const switchHandle = document.getElementById('switchHandle');
-const statusText = document.getElementById('statusText');
-const statusIndicator = document.getElementById('statusIndicator');
-
+// Referencias a elementos HTML de la UI
+let statusDiv;
+let turnOnButton;
+let turnOffButton;
+let switchHandle;
+let lightSwitchBase;
+let statusIndicator;
+let statusText;
 
 // Función para conectar al broker MQTT
 function connectMQTT() {
     statusDiv.textContent = 'Estado: Conectando al MQTT...';
-
-    // Asegurarse de que Paho.MQTT.Client esté disponible antes de usarlo
-    if (typeof Paho === 'undefined' || typeof Paho.MQTT === 'undefined' || typeof Paho.MQTT.Client === 'undefined') {
-        console.error("Paho MQTT library not loaded. Please ensure paho-mqtt.min.js is included before script.js.");
-        statusDiv.textContent = 'Error: Librería MQTT no cargada.';
-        return;
-    }
-
-    client = new Paho.MQTT.Client(mqttBroker, mqttPort, "/mqtt", clientId);
+    
+    // CORRECCIÓN: Usar Paho.Client (no Paho.MQTT.Client)
+    client = new Paho.Client(mqttBroker, mqttPort, "/mqtt", clientId);
 
     // Asignar callbacks
     client.onConnectionLost = onConnectionLost;
@@ -39,17 +31,17 @@ function connectMQTT() {
 
     // Opciones de conexión
     const options = {
-        timeout: 3,
+        timeout: 3, // Tiempo en segundos para intentar conectar
         onSuccess: onConnect,
-        onFailure: onFailure,
-        cleanSession: true // Es buena práctica para clientes web
+        onFailure: onFailure
     };
 
     try {
         client.connect(options);
     } catch (e) {
         console.error("Error al intentar conectar MQTT:", e);
-        statusDiv.textContent = 'Estado: Error al conectar (ver consola)';
+        statusDiv.textContent = 'Estado: Falló la conexión MQTT: ' + e.message;
+        setTimeout(connectMQTT, 5000); 
     }
 }
 
@@ -57,13 +49,8 @@ function connectMQTT() {
 function onConnect() {
     console.log("Conectado al broker MQTT");
     statusDiv.textContent = 'Estado: Conectado. Esperando estado de la luz...';
-    // Suscribirse al tópico donde el ESP32 publica su estado
     client.subscribe(subscribeTopic);
     console.log("Suscrito al tópico: " + subscribeTopic);
-
-    // Opcional: Publicar un mensaje inicial para que el ESP32 envíe su estado actual
-    // Si tu ESP32 responde a un comando para enviar su estado, podrías hacerlo aquí:
-    // publishMessage("GET_STATUS");
 }
 
 // Callback cuando la conexión falla
@@ -72,7 +59,6 @@ function onFailure(responseObject) {
         console.error("Conexión MQTT fallida:", responseObject.errorMessage);
         statusDiv.textContent = 'Estado: Falló la conexión MQTT: ' + responseObject.errorMessage;
     }
-    // Intentar reconectar después de un tiempo
     setTimeout(connectMQTT, 5000);
 }
 
@@ -82,8 +68,34 @@ function onConnectionLost(responseObject) {
         console.warn("Conexión MQTT perdida:", responseObject.errorMessage);
         statusDiv.textContent = 'Estado: Conexión perdida. Reconectando...';
     }
-    // Intentar reconectar
     connectMQTT();
+}
+
+function updateUIForLightState(state) {
+    if (state === "ENCENDIDA") {
+        statusText.textContent = 'Encendida';
+        statusIndicator.classList.remove('off');
+        statusIndicator.classList.add('on');
+        lightSwitchBase.classList.add('on'); 
+        
+        turnOnButton.disabled = true;
+        turnOffButton.disabled = false;
+    } else if (state === "APAGADA") {
+        statusText.textContent = 'Apagada';
+        statusIndicator.classList.remove('on');
+        statusIndicator.classList.add('off');
+        lightSwitchBase.classList.remove('on'); 
+        
+        turnOnButton.disabled = false;
+        turnOffButton.disabled = true;
+    } else {
+        statusText.textContent = 'Desconocido';
+        statusIndicator.classList.remove('on', 'off'); 
+        lightSwitchBase.classList.remove('on'); 
+        
+        turnOnButton.disabled = false; 
+        turnOffButton.disabled = false;
+    }
 }
 
 // Callback cuando llega un mensaje MQTT
@@ -91,76 +103,58 @@ function onMessageArrived(message) {
     console.log("Mensaje recibido: " + message.payloadString + " en tópico: " + message.destinationName);
 
     if (message.destinationName === subscribeTopic) {
-        // Normaliza el estado a mayúsculas para manejar "encendida", "ON", etc.
-        const lightState = message.payloadString.toUpperCase(); 
-        
-        if (lightState === "ON" || lightState === "ENCENDIDA") {
-            // Actualiza el texto de estado general
-            statusDiv.textContent = 'Estado: Luz: ENCENDIDA';
-            // Actualiza los elementos del nuevo diseño visual
-            statusText.textContent = 'Encendido';
-            switchHandle.classList.add('on');
-            switchHandle.classList.remove('off');
-            statusIndicator.classList.add('on');
-            statusIndicator.classList.remove('off');
-            // Habilita/deshabilita botones para feedback
-            turnOnButton.disabled = true;
-            turnOffButton.disabled = false;
-        } else if (lightState === "OFF" || lightState === "APAGADA") {
-            // Actualiza el texto de estado general
-            statusDiv.textContent = 'Estado: Luz: APAGADA';
-            // Actualiza los elementos del nuevo diseño visual
-            statusText.textContent = 'Apagado';
-            switchHandle.classList.add('off');
-            switchHandle.classList.remove('on');
-            statusIndicator.classList.add('off');
-            statusIndicator.classList.remove('on');
-            // Habilita/deshabilita botones para feedback
-            turnOnButton.disabled = false;
-            turnOffButton.disabled = true;
-        } else {
-            // Manejo de estados desconocidos
-            statusDiv.textContent = 'Estado: Mensaje de luz desconocido: ' + lightState;
-            statusText.textContent = 'Desconocido';
-            switchHandle.classList.remove('on', 'off'); // Quitar clases si es un estado no reconocido
-            statusIndicator.classList.remove('on', 'off'); // Quitar clases si es un estado no reconocido
-            turnOnButton.disabled = false; 
-            turnOffButton.disabled = false;
-        }
+        const lightState = message.payloadString;
+        updateUIForLightState(lightState); 
     }
 }
 
 // Función para publicar un mensaje
 function publishMessage(command) {
     if (!client || !client.isConnected()) {
-        console.warn("Cliente MQTT no conectado. No se puede publicar el mensaje.");
+        console.warn("Cliente MQTT no conectado. No se puede publicar el mensaje. Reconectando...");
         statusDiv.textContent = 'Estado: No conectado al MQTT. Reconectando...';
-        connectMQTT(); // Intentar reconectar
+        connectMQTT(); 
         return;
     }
 
-    const message = new Paho.MQTT.Message(command);
+    // CORRECCIÓN: Usar Paho.Message (no Paho.MQTT.Message)
+    const message = new Paho.Message(command);
     message.destinationName = publishTopic;
-    message.retained = false; // Comandos generalmente no son retenidos
+    message.retained = true; 
     client.send(message);
     console.log("Mensaje publicado: " + command + " en tópico: " + publishTopic);
     statusDiv.textContent = 'Estado: Enviando comando: ' + command;
 }
 
-// Event Listeners para los botones
-document.addEventListener('DOMContentLoaded', () => {
-    // Aquí es donde se ejecuta tu código una vez que el DOM está completamente cargado.
-    // Esto incluye asegurar que las librerías externas (como Paho) se hayan inicializado.
+// Inicialización cuando TODO el documento ha cargado (incluyendo scripts externos)
+window.onload = () => {
+    // Inicializar referencias a los elementos HTML
+    statusDiv = document.getElementById('status');
+    turnOnButton = document.getElementById('turnOnButton');
+    turnOffButton = document.getElementById('turnOffButton');
+    switchHandle = document.getElementById('switchHandle');
+    lightSwitchBase = document.querySelector('.light-switch');
+    statusIndicator = document.getElementById('statusIndicator');
+    statusText = document.getElementById('statusText');
 
+    // Adjuntar Event Listeners para los botones y el interruptor visual
     turnOnButton.addEventListener('click', () => {
-        publishMessage("ON"); // Envía "ON" o "ENCENDER" según lo que espere tu ESP32
+        publishMessage("ON");
     });
 
     turnOffButton.addEventListener('click', () => {
-        publishMessage("OFF"); // Envía "OFF" o "APAGAR" según lo que espere tu ESP32
+        publishMessage("OFF");
     });
 
-    // ¡IMPORTANTE! Iniciar la conexión MQTT aquí, DENTRO de DOMContentLoaded
-    // Esto asegura que Paho ya esté disponible cuando connectMQTT sea llamada.
-    connectMQTT(); 
-});
+    // Añadir interactividad al interruptor visual
+    lightSwitchBase.addEventListener('click', () => {
+        if (lightSwitchBase.classList.contains('on')) {
+            publishMessage("OFF");
+        } else {
+            publishMessage("ON");
+        }
+    });
+
+    // Iniciar la conexión MQTT al cargar la página
+    connectMQTT();
+};
